@@ -154,5 +154,7 @@ namespace IdentityServer3.AccessTokenValidation
         ///   <c>true</c> if access token is preserved; otherwise, <c>false</c>.
         /// </value>
         public bool PreserveAccessToken { get; set; }
+
+        public bool FetchUserInfo { get; set; }
     }
 }

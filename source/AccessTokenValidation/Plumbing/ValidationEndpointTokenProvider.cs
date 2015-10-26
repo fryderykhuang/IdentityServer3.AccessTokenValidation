@@ -20,6 +20,8 @@ using Microsoft.Owin.Security.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
@@ -33,6 +35,7 @@ namespace IdentityServer3.AccessTokenValidation
         private readonly string _tokenValidationEndpoint;
         private readonly IdentityServerBearerTokenAuthenticationOptions _options;
         private readonly ILogger _logger;
+        private string _userinfoEndpoint;
 
         public ValidationEndpointTokenProvider(IdentityServerBearerTokenAuthenticationOptions options, ILoggerFactory loggerFactory)
         {
@@ -44,9 +47,10 @@ namespace IdentityServer3.AccessTokenValidation
             }
 
             var baseAddress = options.Authority.EnsureTrailingSlash();
+            _userinfoEndpoint = baseAddress + "connect/userinfo";
+            
             baseAddress += "connect/accesstokenvalidation";
             _tokenValidationEndpoint = baseAddress;
-
             var handler = options.BackchannelHttpHandler ?? new WebRequestHandler();
 
             if (options.BackchannelCertificateValidator != null)
@@ -101,6 +105,39 @@ namespace IdentityServer3.AccessTokenValidation
             var jsonString = await response.Content.ReadAsStringAsync();
             var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonString);
 
+
+            if (_options.FetchUserInfo)
+            {
+                HttpResponseMessage userinfoResponse;
+                try
+                {
+                    var userinfoForm = new Dictionary<string, string>
+                    {
+                        {"access_token", context.Token}
+                    };
+
+                    userinfoResponse =
+                        await _client.PostAsync(_userinfoEndpoint, new FormUrlEncodedContent(userinfoForm));
+                    if (userinfoResponse.StatusCode != HttpStatusCode.OK)
+                    {
+                        _logger.WriteError("Error fetch user info: " + userinfoResponse.ReasonPhrase);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.WriteError("Exception while contacting user info endpoint: " + ex);
+                    return;
+                }
+
+                var dic = await userinfoResponse.Content.ReadAsAsync<Dictionary<string, object>>();
+                foreach (var i in dic)
+                {
+                    if (!dictionary.ContainsKey(i.Key))
+                        dictionary.Add(i.Key, i.Value);
+                }
+            }
+
             var claims = new List<Claim>();
 
             foreach (var item in dictionary)
@@ -124,6 +161,9 @@ namespace IdentityServer3.AccessTokenValidation
             {
                 await _options.ValidationResultCache.AddAsync(context.Token, claims);
             }
+
+            _logger.WriteVerbose(
+                $"{nameof(ValidationEndpointTokenProvider)}: token loaded: {string.Join(",", claims.Select(x => $"{x.Type}:{x.Value}"))}");
 
             SetAuthenticationTicket(context, claims);
         }
