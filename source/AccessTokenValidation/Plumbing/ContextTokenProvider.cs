@@ -32,7 +32,7 @@ namespace IdentityServer3.AccessTokenValidation
         /// <returns>
         /// A <see cref="T:System.Threading.Tasks.Task" /> representing the completed operation.
         /// </returns>
-        public Task RequestToken(OAuthRequestTokenContext context)
+        public virtual Task RequestToken(OAuthRequestTokenContext context)
         {
             context.Token = context.OwinContext.Get<string>("idsrv:tokenvalidation:token");
             return Task.FromResult(0);
@@ -60,7 +60,7 @@ namespace IdentityServer3.AccessTokenValidation
         /// <returns>
         /// A <see cref="T:System.Threading.Tasks.Task" /> representing the completed operation.
         /// </returns>
-        public Task ValidateIdentity(OAuthValidateIdentityContext context)
+        public virtual Task ValidateIdentity(OAuthValidateIdentityContext context)
         {
             return Task.FromResult(0);
         }

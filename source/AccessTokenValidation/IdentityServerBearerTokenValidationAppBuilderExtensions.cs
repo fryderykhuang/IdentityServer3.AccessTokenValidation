@@ -97,6 +97,11 @@ namespace Owin
                 Provider = new ContextTokenProvider(),
             };
 
+            if (options.TokenProvider != null)
+            {
+                bearerOptions.Provider = options.TokenProvider;
+            }
+
             return bearerOptions;
         }
 
@@ -157,6 +162,11 @@ namespace Owin
                 AuthenticationType = options.AuthenticationType,
                 Provider = new ContextTokenProvider()
             };
+
+            if (options.TokenProvider != null)
+            {
+                bearerOptions.Provider = options.TokenProvider;
+            }
 
             return bearerOptions;
         }
