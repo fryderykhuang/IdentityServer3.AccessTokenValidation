@@ -41,7 +41,10 @@ namespace Owin
             if (options == null) throw new ArgumentNullException("options");
 
             var loggerFactory = app.GetLoggerFactory();
-            var middlewareOptions = new IdentityServerOAuthBearerAuthenticationOptions();
+            var middlewareOptions = new IdentityServerOAuthBearerAuthenticationOptions()
+            {
+                OnValidationAppBuilderCreated = options.OnValidationAppBuilderCreated
+            };
 
             switch (options.ValidationMode)
             {

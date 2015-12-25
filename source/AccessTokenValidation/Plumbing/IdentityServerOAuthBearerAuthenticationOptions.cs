@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+using System;
 using Microsoft.Owin.Security.OAuth;
+using Owin;
 
 namespace IdentityServer3.AccessTokenValidation
 {
@@ -46,5 +48,7 @@ namespace IdentityServer3.AccessTokenValidation
         /// The endpoint validation options.
         /// </value>
         public OAuthBearerAuthenticationOptions EndpointValidationOptions { get; set; }
+
+        public Action<IAppBuilder> OnValidationAppBuilderCreated { get; set; }
     }
 }

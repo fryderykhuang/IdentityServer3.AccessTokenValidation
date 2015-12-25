@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using Owin;
 
 namespace IdentityServer3.AccessTokenValidation
 {
@@ -156,5 +157,7 @@ namespace IdentityServer3.AccessTokenValidation
         public bool PreserveAccessToken { get; set; }
 
         public bool FetchUserInfo { get; set; }
+
+        public Action<IAppBuilder> OnValidationAppBuilderCreated { get; set; }
     }
 }

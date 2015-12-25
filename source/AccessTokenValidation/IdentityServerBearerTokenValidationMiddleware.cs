@@ -53,6 +53,7 @@ namespace IdentityServer3.AccessTokenValidation
             if (options.LocalValidationOptions != null)
             {
                 var localBuilder = new AppBuilder();
+                options.OnValidationAppBuilderCreated?.Invoke(localBuilder);
                 localBuilder.UseOAuthBearerAuthentication(options.LocalValidationOptions);
                 localBuilder.Run(ctx => next(ctx.Environment));
                 _localValidationFunc = localBuilder.Build();
@@ -61,6 +62,7 @@ namespace IdentityServer3.AccessTokenValidation
             if (options.EndpointValidationOptions != null)
             {
                 var endpointBuilder = new AppBuilder();
+                options.OnValidationAppBuilderCreated?.Invoke(endpointBuilder);
                 endpointBuilder.Properties["host.AppName"] = "foobar";
 
                 endpointBuilder.UseOAuthBearerAuthentication(options.EndpointValidationOptions);
